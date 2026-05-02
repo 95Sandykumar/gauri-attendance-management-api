@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: gauri-attendance-api
+    env: java
+    region: ohio
+    buildCommand: ./gradlew build -x test
+    startCommand: java -jar build/libs/attendance-management-api-0.0.1-SNAPSHOT.jar
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: gauri-attendance-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: gauri-attendance-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: gauri-attendance-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: gauri-attendance-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: gauri-attendance-db
+          property: password
+      - key: JWT_SECRET
+        value: gaurisharma_attendance_jwt_secret_2024_secure_key_xyz
+      - key: JWT_EXPIRATION_TIME
+        value: 86400000
+
+databases:
+  - name: gauri-attendance-db
+    databaseName: attendance_db
+    user: gauri_admin
