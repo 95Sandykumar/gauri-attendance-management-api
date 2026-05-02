@@ -1,0 +1,136 @@
+package com.gaurisharma.attendance.app.rfid_credentials.impl;
+
+import com.gaurisharma.attendance.app.rfid_credentials.models.entities.RFIDCredential;
+import com.gaurisharma.attendance.app.students.models.entities.Student;
+import com.gaurisharma.attendance.enums.ExecutionStatus;
+import com.gaurisharma.attendance.app.rfid_credentials.repositories.RFIDCredentialRepository;
+import com.gaurisharma.attendance.app.rfid_credentials.services.RFIDCredentialService;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
+
+@Service
+@Log4j2
+public class RFIDCredentialServiceImpl implements RFIDCredentialService {
+
+	private final RFIDCredentialRepository rfidCredentialRepository;
+
+	public RFIDCredentialServiceImpl(RFIDCredentialRepository rfidCredentialRepository) {
+		this.rfidCredentialRepository = rfidCredentialRepository;
+	}
+
+	/**
+	 * Create a new RFID Credential
+	 *
+	 * @param rfidCredential RFID Credential to be created
+	 * @return ExecutionStatus (SUCCESS, FAILURE)
+	 */
+	@Override
+	public ExecutionStatus createRFIDCredential(RFIDCredential rfidCredential) {
+		if (isExists(rfidCredential)) {
+			return validationFailedLog(rfidCredential.getId());
+		}
+
+		if (isNotValid(rfidCredential)) {
+			return validationFailedLog(rfidCredential.getId());
+		}
+
+		rfidCredentialRepository.save(rfidCredential);
+		log.debug("RFID Credential {} created", rfidCredential.getId());
+		return ExecutionStatus.SUCCESS;
+	}
+
+	/**
+	 * Delete an RFID Credential
+	 *
+	 * @param rfidCredential RFID Credential to be deleted
+	 * @return ExecutionStatus (SUCCESS, FAILURE)
+	 */
+	@Override
+	public ExecutionStatus deleteRFIDCredential(RFIDCredential rfidCredential) {
+		if (!isExists(rfidCredential)) {
+			return notFoundLog(rfidCredential.getId());
+		}
+
+		rfidCredentialRepository.delete(rfidCredential);
+		log.debug("RFID Credential {} deleted", rfidCredential.getId());
+		return ExecutionStatus.SUCCESS;
+	}
+
+	/**
+	 * Update an RFID Credential
+	 *
+	 * @param rfidCredential RFID Credential to be updated
+	 * @return ExecutionStatus (SUCCESS, FAILURE)
+	 */
+	@Override
+	public ExecutionStatus updateRFIDCredential(RFIDCredential rfidCredential) {
+		if (!isExists(rfidCredential)) {
+			return notFoundLog(rfidCredential.getId());
+		}
+
+		if (isNotValid(rfidCredential)) {
+			return validationFailedLog(rfidCredential.getId());
+		}
+
+		rfidCredentialRepository.save(rfidCredential);
+		log.debug("RFID Credential {} updated", rfidCredential.getId());
+		return ExecutionStatus.SUCCESS;
+	}
+
+	/**
+	 * Get an RFID Credential by Student
+	 *
+	 * @param student Student to get the RFID Credential
+	 * @return RFIDCredential
+	 */
+	@Override
+	public RFIDCredential getRFIDCredentialByStudent(Student student) {
+		return rfidCredentialRepository.getRFIDCredentialByStudent(student).orElse(null);
+	}
+
+	/**
+	 * Get an RFID Credential by Student ID
+	 *
+	 * @param studentId Student ID to get the RFID Credential
+	 * @return RFIDCredential
+	 */
+	@Override
+	public RFIDCredential getRFIDCredentialByStudentId(Long studentId) {
+		return rfidCredentialRepository.getRFIDCredentialByStudentId(studentId).orElse(null);
+	}
+
+	/**
+	 * Get an RFID Credential by RFID Hash
+	 *
+	 * @param hash RFID Hash to get the RFID Credential
+	 * @return RFIDCredential else null if not found
+	 */
+	@Override
+	public RFIDCredential getRFIDCredentialByHash(String hash) {
+		return rfidCredentialRepository.getRFIDCredentialByHash(hash).orElse(null);
+	}
+
+	private boolean isExists(RFIDCredential credential) {
+		return rfidCredentialRepository.existsById(credential.getId());
+	}
+
+	private boolean isNotValid(RFIDCredential credential) {
+		if (credential.getLrn() == null) {
+			return true;
+		}
+
+		return !credential.getHashedLrn().isEmpty();
+	}
+
+	private ExecutionStatus validationFailedLog(int credentialId) {
+		log.debug("RFID Credential {} validation failed", credentialId);
+		return ExecutionStatus.VALIDATION_ERROR;
+	}
+
+	private ExecutionStatus notFoundLog(int credentialId) {
+		log.debug("RFID Credential {} not found", credentialId);
+		return ExecutionStatus.NOT_FOUND;
+	}
+}

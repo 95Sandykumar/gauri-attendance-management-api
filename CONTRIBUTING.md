@@ -11,7 +11,7 @@ Prior to embarking on your contribution journey, kindly ensure that you have the
 Initiate the process by forking the repository on GitHub and subsequently cloning your fork to your local machine using the command:
 
 ```
-git clone https://github.com/llTheBlankll/attendance-system-api-springboot.git
+git clone https://github.com/gaurisharma/attendance-management-api.git
 ```
 
 ## Navigate to the project directory to proceed:
